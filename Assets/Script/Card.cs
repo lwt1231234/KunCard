@@ -25,7 +25,7 @@ public class Card : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		UpdateUI ();
 	}
 
 	public void Init(CardInfo c,bool vis,string o){
@@ -46,9 +46,7 @@ public class Card : MonoBehaviour {
 
 		UpdateUI ();
 
-
 		if (visiable) {
-			
 			if (CardInfo_this.actionColor == "剪") {
 				Color a = new Color (255f / 255f, 203f / 255f, 203f / 255f, 1f);
 				gameObject.GetComponent<SpriteRenderer> ().color = a;
@@ -103,8 +101,8 @@ public class Card : MonoBehaviour {
 	void OnMouseDown()
 	{
 //		Debug.Log("鼠标按下时");
-		if(owner == "Player"&&used==false);
-		GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
+		if(used == false)
+			GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
 	}
 	void OnMouseUp()
 	{
