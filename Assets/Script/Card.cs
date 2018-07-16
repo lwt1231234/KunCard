@@ -18,6 +18,7 @@ public class Card : MonoBehaviour {
 	public CardInfo CardInfo_this;
 	public string owner;
 	public bool visiable,chosed,used;
+	public string InWhere;
 
 	void Start () {
 		GameManager = GameObject.Find ("GameManager");
@@ -28,10 +29,11 @@ public class Card : MonoBehaviour {
 		UpdateUI ();
 	}
 
-	public void Init(CardInfo c,bool vis,string o){
+	public void Init(CardInfo c,bool vis,string o,string p){
 		CardInfo_this = c;
 		visiable = vis;
 		owner = o;
+		InWhere = p;
 		chosed = false;
 		used = false;
 
@@ -93,6 +95,13 @@ public class Card : MonoBehaviour {
 		gameObject.SetActive (false);
 	}
 
+	public void BeDestroied(){
+		Destroy(actionColor_UI);
+		Destroy(actionPoint_UI);
+		Destroy(actionType_UI);
+		Destroy(gameObject);
+	}
+
 	void OnMouseDrag ()
 	{
 //		Debug.Log("鼠标拖动该模型区域时");
@@ -101,8 +110,13 @@ public class Card : MonoBehaviour {
 	void OnMouseDown()
 	{
 //		Debug.Log("鼠标按下时");
-		if(used == false)
-			GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
+		if(used == false){
+			if(InWhere == "Game")
+				GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
+			if(InWhere == "UpGrade")
+				GameManager.GetComponent<GameManager_InStage>().OnClickCard(this.gameObject);
+		}
+
 	}
 	void OnMouseUp()
 	{

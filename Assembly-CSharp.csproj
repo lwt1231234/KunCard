@@ -51,11 +51,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Script\BackGround.cs" />
      <Compile Include="Assets\Script\Card.cs" />
      <Compile Include="Assets\Script\GameInfo.cs" />
      <Compile Include="Assets\Script\GameManager_InBattle.cs" />
+     <Compile Include="Assets\Script\GameManager_InStage.cs" />
      <Compile Include="Assets\Script\PlayerActionLabel.cs" />
      <Compile Include="Assets\Script\SkillCard.cs" />
+     <Compile Include="Assets\Script\Stage.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

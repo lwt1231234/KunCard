@@ -58,6 +58,7 @@ public class GameManager_InBattle : MonoBehaviour {
 
 		Player_Skill = GameInfo.GetComponent<GameInfo> ().Player_SKill_Used;
 		PlayerSkillcard.GetComponent<SkillCard> ().Init (Player_Skill);
+
 		CPU_Skill = GameInfo.GetComponent<GameInfo> ().CPU_SKill_Used;
 		CPUSkillcard.GetComponent<SkillCard> ().Init (CPU_Skill);
 
@@ -90,7 +91,7 @@ public class GameManager_InBattle : MonoBehaviour {
 		Vector3 PlayerCardPosition = new Vector3 (-9, -16, 0);
 		for (int i = 0; i < Player_CardListInGame.Count; i++) {
 			GameObject CardObject_tmp = Instantiate (Card_Prefab, PlayerCardPosition, Quaternion.identity);
-			CardObject_tmp.GetComponent<Card> ().Init (Player_CardListInGame[i],true,"Player");
+			CardObject_tmp.GetComponent<Card> ().Init (Player_CardListInGame[i],true,"Player","Game");
 			Player_CardObjectList.Add (CardObject_tmp);
 
 			PlayerCardPosition += new Vector3 (5.5f, 0, 0);
@@ -100,7 +101,7 @@ public class GameManager_InBattle : MonoBehaviour {
 		Vector3 CPUCardPosition = new Vector3 (-16, 0, 0);
 		for (int i = 0; i < CPU_CardListInGame.Count; i++) {
 			GameObject CardObject_tmp = Instantiate (Card_Prefab, CPUCardPosition, Quaternion.identity);
-			CardObject_tmp.GetComponent<Card> ().Init (CPU_CardListInGame[i],true,"CPU");
+			CardObject_tmp.GetComponent<Card> ().Init (CPU_CardListInGame[i],true,"CPU","Game");
 			CPU_CardObjectList.Add (CardObject_tmp);
 
 			CPUCardPosition += new Vector3 (5.5f, 0, 0);
@@ -347,7 +348,6 @@ public class GameManager_InBattle : MonoBehaviour {
 			CardUsedID = -1;
 			UseCardButton.GetComponent<Button> ().interactable = false;
 		}
-
 	}
 	//----------------------------------游戏阶段进程
 	void GameEnd(){
@@ -355,15 +355,29 @@ public class GameManager_InBattle : MonoBehaviour {
 		if (Player_Health > CPU_Health || (Player_Health == CPU_Health && Player_Armor>CPU_Armor)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 														+"护甲"+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"获胜！";
+			GameInfo.GetComponent<GameInfo> ().WinGame ();
+			Invoke ("BackToStage", 3.0f);
 		} 
 		if (Player_Health < CPU_Health || (Player_Health == CPU_Health && Player_Armor<CPU_Armor)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"败北！";
+
+			GameInfo.GetComponent<GameInfo> ().WinGame ();
+			Invoke ("BackToStage", 3.0f);
 		} 
 		if (Player_Health == CPU_Health && Player_Armor==CPU_Armor) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"平局！";
+
+			GameInfo.GetComponent<GameInfo> ().WinGame ();
+			Invoke ("BackToStage", 3.0f);
 		} 
-		//SceneManager.LoadScene (1);
+
+
+
+	}
+
+	void BackToStage(){
+		SceneManager.LoadScene (0);
 	}
 }

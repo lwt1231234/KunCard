@@ -6,5 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scene/ChooseStage.unity
+    guid: e82b809ed938a5a4fb23900b03a41401
+  - enabled: 1
     path: Assets/Scene/InBattle.unity
     guid: d516a3e65c3940749b88f0cf402febdc
