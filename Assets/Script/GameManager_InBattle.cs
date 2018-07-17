@@ -4,18 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class CardInfo{
-	public int actionPoint;
-	public string actionType,actionColor;
-	public bool inUse;
-
-	public CardInfo(int a,string b, string c){
-		actionPoint = a;
-		actionType = c;
-		actionColor = b;
-	}
-}
-
 public class GameManager_InBattle : MonoBehaviour {
 
 	public GameObject Card_Prefab,BattleActionLabel_Prefab;
@@ -23,6 +11,8 @@ public class GameManager_InBattle : MonoBehaviour {
 	public GameObject Player_Health_UI,Player_Armor_UI,PlayerSkillcard;
 	public GameObject CPU_Health_UI,CPU_Armor_UI,CPUSkillcard;
 	public GameObject UseCardButton,GameResult;
+
+	public List<SkillInfo> SkillList=new List<SkillInfo>();
 
 	public List<CardInfo> Player_CardList=new List<CardInfo>();
 	public List<CardInfo> Player_CardListInGame=new List<CardInfo>();
@@ -36,7 +26,7 @@ public class GameManager_InBattle : MonoBehaviour {
 	public List<string> CPUAction=new List<string>();
 
 	public int Player_Health,CPU_Health,Player_Armor,CPU_Armor;
-	public string Player_Skill,CPU_Skill;
+	public int Player_Skill,CPU_Skill;
 
 	int CardUsedID,CPUCardUsedID,BPNumber;
 	string GameStage;
@@ -54,13 +44,14 @@ public class GameManager_InBattle : MonoBehaviour {
 		GameStage = "Init";
 
 		Player_Health = GameInfo.GetComponent<GameInfo> ().Player_MaxHealth;
-		CPU_Health = GameInfo.GetComponent<GameInfo> ().Player_MaxHealth;
+		CPU_Health = GameInfo.GetComponent<GameInfo> ().CPU_MaxHealth;
 
+		SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
 		Player_Skill = GameInfo.GetComponent<GameInfo> ().Player_SKill_Used;
-		PlayerSkillcard.GetComponent<SkillCard> ().Init (Player_Skill);
+		PlayerSkillcard.GetComponent<SkillCard> ().Init (SkillList[Player_Skill-1].Name,SkillList[Player_Skill-1].Description);
 
 		CPU_Skill = GameInfo.GetComponent<GameInfo> ().CPU_SKill_Used;
-		CPUSkillcard.GetComponent<SkillCard> ().Init (CPU_Skill);
+		CPUSkillcard.GetComponent<SkillCard> ().Init (SkillList[CPU_Skill-1].Name,SkillList[CPU_Skill-1].Description);
 
 		Player_Armor = 0;
 		CPU_Armor = 0;
@@ -217,12 +208,16 @@ public class GameManager_InBattle : MonoBehaviour {
 			CPU_Armor += CPUInfo.actionPoint;
 		}
 		if (PlayerInfo.actionType == "技能") {
-			if (Player_Skill == "穿刺")
+			if (Player_Skill == 1)
 				useSkill_chuanci ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill == 2)
+				useSkill_huifu ("Player",PlayerInfo.actionPoint);
 		}
 		if (CPUInfo.actionType == "技能") {
-			if (CPU_Skill == "穿刺")
+			if (CPU_Skill == 1)
 				useSkill_chuanci ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill == 2)
+				useSkill_huifu ("CPU",CPUInfo.actionPoint);
 		}
 			
 		if (Player_Armor < 0) {
@@ -301,6 +296,24 @@ public class GameManager_InBattle : MonoBehaviour {
 		}else{
 			Player_Health -= point;
 			PlayerAction.Add (Action_tmp);
+		}
+	}
+
+	void useSkill_huifu (string user,int point){
+		string Action_tmp = "";
+		Action_tmp ="恢复"+point.ToString()+"点生命";
+		if (user == "Player") {
+			Player_Health += point;
+			int maxHealth = GameInfo.GetComponent<GameInfo> ().Player_MaxHealth;
+			if (Player_Health > maxHealth)
+				Player_Health = maxHealth;
+			PlayerAction.Add (Action_tmp);
+		}else{
+			CPU_Health += point;
+			int maxHealth = GameInfo.GetComponent<GameInfo> ().CPU_MaxHealth;
+			if (CPU_Health > maxHealth)
+				CPU_Health = maxHealth;
+			CPUAction.Add (Action_tmp);
 		}
 	}
 

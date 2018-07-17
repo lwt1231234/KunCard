@@ -115,6 +115,8 @@ public class Card : MonoBehaviour {
 				GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
 			if(InWhere == "UpGrade")
 				GameManager.GetComponent<GameManager_InStage>().OnClickCard(this.gameObject);
+			if(InWhere == "Remove")
+				GameManager.GetComponent<GameManager_InStage>().OnClickCard(this.gameObject);
 		}
 
 	}

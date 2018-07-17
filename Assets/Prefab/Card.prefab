@@ -81,8 +81,13 @@ MonoBehaviour:
   UI_Text: {fileID: 1802406688895836, guid: c92e16ebc71a4254db46bbe394707887, type: 2}
   images:
   - {fileID: 21300000, guid: 03483f9a6e325bc449268f732909d210, type: 3}
-  - {fileID: 21300000, guid: cc5267c23e45eae43bddc170f07b821d, type: 3}
+  - {fileID: 21300000, guid: 5c71f272b9310d34c900724b4085b88d, type: 3}
   - {fileID: 0}
+  owner: 
+  visiable: 0
+  chosed: 0
+  used: 0
+  InWhere: 
 --- !u!212 &212491082241001132
 SpriteRenderer:
   m_ObjectHideFlags: 1

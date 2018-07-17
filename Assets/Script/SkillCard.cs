@@ -18,7 +18,7 @@ public class SkillCard : MonoBehaviour {
 		
 	}
 
-	public void Init(string name){
+	public void Init(string name,string description){
 		Name_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 		Name_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
 		Name_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0);
@@ -28,8 +28,7 @@ public class SkillCard : MonoBehaviour {
 		Description_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 		Description_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
 		Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetColor;
-		if(name == "穿刺")
-			Description_UI.GetComponent<Text> ().text = "对敌人造成无视护甲的伤害";
+		Description_UI.GetComponent<Text> ().text = "description";
 		Description_UI.SetActive(false);
 	}
 

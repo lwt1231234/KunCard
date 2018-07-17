@@ -57,6 +57,7 @@
      <Compile Include="Assets\Script\GameManager_InBattle.cs" />
      <Compile Include="Assets\Script\GameManager_InStage.cs" />
      <Compile Include="Assets\Script\PlayerActionLabel.cs" />
+     <Compile Include="Assets\Script\Skill.cs" />
      <Compile Include="Assets\Script\SkillCard.cs" />
      <Compile Include="Assets\Script\Stage.cs" />
  <Reference Include="UnityEngine.UI">
