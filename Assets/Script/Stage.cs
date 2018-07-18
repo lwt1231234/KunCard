@@ -35,6 +35,50 @@ public class Stage : MonoBehaviour {
 				if (StageClear [2-1])
 					Available = 1;
 				break;
+			case 4:
+				if (StageClear [3-1])
+					Available = 1;
+				break;
+			case 5:
+				if (StageClear [3-1])
+					Available = 1;
+				break;
+			case 6:
+				if (StageClear [5-1])
+					Available = 1;
+				break;
+			case 7:
+				if (StageClear [3-1])
+					Available = 1;
+				break;
+			case 8:
+				if (StageClear [7-1])
+					Available = 1;
+				break;
+			case 9:
+				if (StageClear [6-1])
+					Available = 1;
+				break;
+			case 10:
+				if (StageClear [9-1])
+					Available = 1;
+				break;
+			case 11:
+				if (StageClear [8-1])
+					Available = 1;
+				break;
+			case 12:
+				if (StageClear [11-1])
+					Available = 1;
+				break;
+			case 13:
+				if (StageClear [4-1]||StageClear [9-1]||StageClear [11-1])
+					Available = 1;
+				break;
+			case 14:
+				if (StageClear [13-1])
+					Available = 1;
+				break;
 			}
 		}
 
@@ -51,7 +95,7 @@ public class Stage : MonoBehaviour {
 			gameObject.GetComponent<SpriteRenderer> ().color = a;
 		}
 		if (Description_UI == null) {
-			Vector3 offsetColor = new Vector3 (0,55, 0);
+			Vector3 offsetColor = new Vector3 (0,35, 0);
 			Description_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 			Description_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
 			Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetColor;

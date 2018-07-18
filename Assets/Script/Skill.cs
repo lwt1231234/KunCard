@@ -18,7 +18,7 @@ public class Skill : MonoBehaviour {
 			Invoke ("Start", 0.5f);
 			return;
 		}
-		SkillInfo SkillThis = GameInfo.GetComponent<GameInfo> ().SkillList [SkillNum - 1];
+		SkillInfo SkillThis = GameInfo.GetComponent<GameInfo> ().SkillList [SkillNum];
 		Name = SkillThis.Name;
 		Description = SkillThis.Description;
 		GoldRequire = SkillThis.GoldRequire;

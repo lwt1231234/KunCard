@@ -10,7 +10,7 @@ public class GameManager_InBattle : MonoBehaviour {
 
 	public GameObject Player_Health_UI,Player_Armor_UI,PlayerSkillcard;
 	public GameObject CPU_Health_UI,CPU_Armor_UI,CPUSkillcard;
-	public GameObject UseCardButton,GameResult;
+	public GameObject UseCardButton,CancelAddCardButton,GameResult,GetGold;
 
 	public List<SkillInfo> SkillList=new List<SkillInfo>();
 
@@ -22,11 +22,15 @@ public class GameManager_InBattle : MonoBehaviour {
 	public List<CardInfo> CPU_CardListInGame=new List<CardInfo>();
 	public List<GameObject> CPU_CardObjectList=new List<GameObject>();
 
+	public List<CardInfo> AddCardList=new List<CardInfo>();
+	public List<GameObject> AddCardObjectList=new List<GameObject>();
+
 	public List<string> PlayerAction=new List<string>();
 	public List<string> CPUAction=new List<string>();
 
 	public int Player_Health,CPU_Health,Player_Armor,CPU_Armor;
 	public int Player_Skill,CPU_Skill;
+	int AddCardLevel;
 
 	int CardUsedID,CPUCardUsedID,BPNumber;
 	string GameStage;
@@ -45,19 +49,25 @@ public class GameManager_InBattle : MonoBehaviour {
 
 		Player_Health = GameInfo.GetComponent<GameInfo> ().Player_MaxHealth;
 		CPU_Health = GameInfo.GetComponent<GameInfo> ().CPU_MaxHealth;
+		AddCardLevel = GameInfo.GetComponent<GameInfo> ().AddCardLevel;
+
 
 		SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
 		Player_Skill = GameInfo.GetComponent<GameInfo> ().Player_SKill_Used;
-		PlayerSkillcard.GetComponent<SkillCard> ().Init (SkillList[Player_Skill-1].Name,SkillList[Player_Skill-1].Description);
+		PlayerSkillcard.GetComponent<SkillCard> ().Init (SkillList[Player_Skill].Name,SkillList[Player_Skill].Description);
 
 		CPU_Skill = GameInfo.GetComponent<GameInfo> ().CPU_SKill_Used;
-		CPUSkillcard.GetComponent<SkillCard> ().Init (SkillList[CPU_Skill-1].Name,SkillList[CPU_Skill-1].Description);
+		CPUSkillcard.GetComponent<SkillCard> ().Init (SkillList[CPU_Skill].Name,SkillList[CPU_Skill].Description);
 
 		Player_Armor = 0;
 		CPU_Armor = 0;
 		GameResult.SetActive (false);
+		GetGold.SetActive (false);
+		CancelAddCardButton.SetActive (false);
 
-		Player_CardList = GameInfo.GetComponent<GameInfo> ().Player_CardList;
+		for (int i = 0; i < GameInfo.GetComponent<GameInfo> ().Player_CardList.Count; i++)
+			Player_CardList.Add (GameInfo.GetComponent<GameInfo> ().Player_CardList [i]);
+
 		CPU_CardList = GameInfo.GetComponent<GameInfo> ().CPU_CardList;
 
 		for (int i = 0; i < 5; i++) {
@@ -71,6 +81,26 @@ public class GameManager_InBattle : MonoBehaviour {
 			CPU_CardListInGame.Add (CPU_CardList [j]);
 			CPU_CardList.Remove(CPU_CardList [j]);
 		}
+
+		CardInfo tmp;
+		for (int i = 0; i < Player_CardListInGame.Count - 1; i++)
+			for (int j = Player_CardListInGame.Count - 1; j > i; j--) {
+				if (Player_CardListInGame [j].Comparer (Player_CardListInGame [j - 1]) < 0) {
+					tmp = Player_CardListInGame [j];
+					Player_CardListInGame [j] = Player_CardListInGame [j - 1];
+					Player_CardListInGame [j - 1] = tmp;
+				}
+			}
+				
+		for (int i = 0; i < CPU_CardListInGame.Count - 1; i++)
+			for (int j = CPU_CardListInGame.Count - 1; j > i; j--) {
+				if (CPU_CardListInGame [j].Comparer (CPU_CardListInGame [j - 1]) < 0) {
+					tmp = CPU_CardListInGame [j];
+					CPU_CardListInGame [j] = CPU_CardListInGame [j - 1];
+					CPU_CardListInGame [j - 1] = tmp;
+				}
+			}
+
 		UpdateUI ();
 		StartBP ();
 	}
@@ -78,6 +108,9 @@ public class GameManager_InBattle : MonoBehaviour {
 	void StartBP(){
 		GameStage = "BP";
 		BPNumber = 2;
+		GetGold.SetActive (true);
+		GetGold.GetComponent<Text> ().text = "移除对手的2张牌";
+
 		//玩家卡牌
 		Vector3 PlayerCardPosition = new Vector3 (-9, -16, 0);
 		for (int i = 0; i < Player_CardListInGame.Count; i++) {
@@ -101,7 +134,7 @@ public class GameManager_InBattle : MonoBehaviour {
 
 	void StartGame(){
 		GameStage = "InGame";
-
+		GetGold.SetActive (false);
 
 		//机器卡牌
 		Vector3 CPUCardPosition = new Vector3 (-9, 15, 0);
@@ -254,7 +287,7 @@ public class GameManager_InBattle : MonoBehaviour {
 		PlayerCard.GetComponent<Card> ().BeUsed ();
 		CPUCard.GetComponent<Card> ().BeUsed ();
 
-		if (Player_CardObjectList.Count <= 0) {
+		if (Player_CardObjectList.Count <= 0||Player_Health <= 0 || CPU_Health <= 0) {
 			GameEnd ();
 		} else {
 			UseCardButton.GetComponent<Button> ().interactable = true;
@@ -365,29 +398,69 @@ public class GameManager_InBattle : MonoBehaviour {
 	//----------------------------------游戏阶段进程
 	void GameEnd(){
 		GameResult.SetActive (true);
-		if (Player_Health > CPU_Health || (Player_Health == CPU_Health && Player_Armor>CPU_Armor)) {
+		if (Player_Health > CPU_Health || (Player_Health == CPU_Health && Player_Armor>CPU_Armor)||(Player_Health >0 && CPU_Health<=0)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 														+"护甲"+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"获胜！";
-			GameInfo.GetComponent<GameInfo> ().WinGame ();
-			Invoke ("BackToStage", 3.0f);
+			Invoke ("Win", 3.0f);
 		} 
-		if (Player_Health < CPU_Health || (Player_Health == CPU_Health && Player_Armor<CPU_Armor)) {
+		if (Player_Health < CPU_Health || (Player_Health == CPU_Health && Player_Armor<CPU_Armor)||(Player_Health <=0 && CPU_Health>0)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"败北！";
 
-			GameInfo.GetComponent<GameInfo> ().WinGame ();
-			Invoke ("BackToStage", 3.0f);
+			Invoke ("Win", 3.0f);
 		} 
-		if (Player_Health == CPU_Health && Player_Armor==CPU_Armor) {
+		if ((Player_Health == CPU_Health && Player_Armor==CPU_Armor )|| (Player_Health <=0 && CPU_Health<=0)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"平局！";
 
-			GameInfo.GetComponent<GameInfo> ().WinGame ();
-			Invoke ("BackToStage", 3.0f);
+			Invoke ("Win", 3.0f);
 		} 
+	}
 
+	void Win(){
+		GameInfo.GetComponent<GameInfo> ().WinGame ();
+		GameResult.SetActive (false);
 
+		GetGold.SetActive (true);
+		int GoldReword = -GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel].GoldReword;
+		GetGold.GetComponent<Text> ().text = "获得" + GoldReword.ToString () + "金币\n请选择一张牌添加到牌库中";
 
+		string[] t = { "攻击", "防御", "技能" };
+		int point = Random.Range (1, AddCardLevel);
+		string type = t [Random.Range (0, 3)];
+		AddCardList.Add (new CardInfo (point, "石", type));
+
+		point = Random.Range (1, AddCardLevel);
+		type = t [Random.Range (0, 3)];
+		AddCardList.Add (new CardInfo (point, "剪", type));
+
+		point = Random.Range (1, AddCardLevel);
+		type = t [Random.Range (0, 3)];
+		AddCardList.Add (new CardInfo (point, "布", type));
+
+		Vector3 CPUCardPosition = new Vector3 (-10, 0, 0);
+		for (int i = 0; i < AddCardList.Count; i++) {
+			GameObject CardObject_tmp = Instantiate (Card_Prefab, CPUCardPosition, Quaternion.identity);
+			CardObject_tmp.GetComponent<Card> ().Init (AddCardList[i],true,"CPU","AddCard");
+			AddCardObjectList.Add (CardObject_tmp);
+
+			CPUCardPosition += new Vector3 (10, 0, 0);
+		}
+
+		CancelAddCardButton.SetActive (true);
+	}
+
+	public void OnClickAddCard(GameObject c){
+		int i;
+		for (i = 0; i < AddCardObjectList.Count; i++)
+			if (AddCardObjectList [i] == c)
+				GameInfo.GetComponent<GameInfo> ().Player_CardList.Add (AddCardList [i]);
+		BackToStage ();
+		//Invoke ("BackToStage", 3.0f);
+	}
+
+	public void OnClickCancelAddCard(){
+		BackToStage ();
 	}
 
 	void BackToStage(){

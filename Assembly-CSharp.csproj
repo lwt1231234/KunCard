@@ -56,6 +56,7 @@
      <Compile Include="Assets\Script\GameInfo.cs" />
      <Compile Include="Assets\Script\GameManager_InBattle.cs" />
      <Compile Include="Assets\Script\GameManager_InStage.cs" />
+     <Compile Include="Assets\Script\Path.cs" />
      <Compile Include="Assets\Script\PlayerActionLabel.cs" />
      <Compile Include="Assets\Script\Skill.cs" />
      <Compile Include="Assets\Script\SkillCard.cs" />

@@ -28,7 +28,7 @@ public class SkillCard : MonoBehaviour {
 		Description_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 		Description_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
 		Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetColor;
-		Description_UI.GetComponent<Text> ().text = "description";
+		Description_UI.GetComponent<Text> ().text = description;
 		Description_UI.SetActive(false);
 	}
 

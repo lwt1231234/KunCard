@@ -32,17 +32,19 @@ public class GameManager_InStage : MonoBehaviour {
 		}
 
 		int StageNum = GameInfo.GetComponent<GameInfo> ().StageNum;
-		for (int i = 0; i < StageNum; i++)
+		for (int i = 0; i < StageNum; i++) {
+			Stage [i].GetComponent<Stage> ().StageLevel = i+1;
 			Stage [i].GetComponent<Stage> ().Init ();
+		}
+			
 
 		StageParent.SetActive(true);
 		ViewCard.SetActive(true);
 		ChooseSkill.SetActive(true);
 	
-		ReadyToPlay.SetActive (false);
+		ReadyToPlay.transform.parent.gameObject.SetActive (false);
 		Close.SetActive (false);
 		ReadyToUpGrade.SetActive (false);
-
 	}
 	
 	// Update is called once per frame
@@ -81,8 +83,8 @@ public class GameManager_InStage : MonoBehaviour {
 		string StageType = c.GetComponent<Stage> ().StageType;
 		if (StageType == "Game") {
 			//开始关卡
-			ReadyToPlay.SetActive (true);
-			ReadyToPlay.GetComponent<Text> ().text = "开始关卡" + StageLevel.ToString();
+			ReadyToPlay.transform.parent.gameObject.SetActive (true);
+			ReadyToPlay.GetComponent<Text> ().text = "开始关卡\"" + c.GetComponent<Stage> ().Description+"\"";
 		}
 		if (StageType == "UpGrade") {
 			//升级卡牌
@@ -92,6 +94,7 @@ public class GameManager_InStage : MonoBehaviour {
 			Close.SetActive (true);
 			Title_UI.SetActive (true);
 			Title_UI.GetComponent<Text>().text = c.GetComponent<Stage> ().Description;
+			Title_UI.GetComponent<Text>().text +="\n升级费用会逐渐升高";
 
 			ShowPlayerCard ("UpGrade");
 			GameInfo.GetComponent<GameInfo> ().LoadStage (StageLevel);
@@ -108,6 +111,7 @@ public class GameManager_InStage : MonoBehaviour {
 			Close.SetActive (true);
 			Title_UI.SetActive (true);
 			Title_UI.GetComponent<Text>().text = c.GetComponent<Stage> ().Description;
+			Title_UI.GetComponent<Text>().text +="\n移除费用会逐渐升高";
 
 			ShowPlayerCard ("Remove");
 			GameInfo.GetComponent<GameInfo> ().LoadStage (StageLevel);
@@ -119,15 +123,26 @@ public class GameManager_InStage : MonoBehaviour {
 	}
 
 	public void OnClickCancelGame(){
-		ReadyToPlay.SetActive (false);
+		ReadyToPlay.transform.parent.gameObject.SetActive (false);
 	}
 		
 	public void OnClickStartGame(){
-		ReadyToPlay.SetActive (false);
+		ReadyToPlay.transform.parent.gameObject.SetActive (false);
 		GameInfo.GetComponent<GameInfo> ().LoadStage (StageLevel);
 	}
 	//--------------------------------------查看牌组
 	void ShowPlayerCard(string s){
+		List<CardInfo> CardListSort = GameInfo.GetComponent<GameInfo> ().Player_CardList;
+		CardInfo tmp;
+		for (int i = 0; i < CardListSort.Count - 1; i++)
+			for (int j = CardListSort.Count - 1; j > i; j--) {
+				if (CardListSort [j].Comparer (CardListSort [j - 1]) < 0) {
+					tmp = CardListSort [j];
+					CardListSort [j] = CardListSort [j - 1];
+					CardListSort [j - 1] = tmp;
+				}
+			}
+				
 		for (int i = Player_CardObjectList.Count; i >0 ; i--) {
 			Player_CardObjectList [i-1].GetComponent<Card> ().BeDestroied ();;
 		}
@@ -172,16 +187,17 @@ public class GameManager_InStage : MonoBehaviour {
 
 			List<CardInfo> Player_CardListHere=GameInfo.GetComponent<GameInfo> ().Player_CardList;
 			string text_tmp = "升级卡牌\n";
+			int GoldNeed = -GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel-1].GoldReword;
 			text_tmp += Player_CardListHere [CardSelected].actionPoint.ToString()+"-";
 			text_tmp += Player_CardListHere [CardSelected].actionColor.ToString()+"-";
 			text_tmp += Player_CardListHere [CardSelected].actionType.ToString()+" -> ";
 			text_tmp += (Player_CardListHere [CardSelected].actionPoint+1).ToString()+"-";
 			text_tmp += Player_CardListHere [CardSelected].actionColor.ToString()+"-";
 			text_tmp += Player_CardListHere [CardSelected].actionType.ToString()+"\n需要";
-			text_tmp += (Player_CardListHere [CardSelected].actionPoint*100).ToString()+"金币";
+			text_tmp += GoldNeed.ToString()+"金币";
 			ReadyToUpGrade.GetComponent<Text> ().text = text_tmp;
 
-			if (GameInfo.GetComponent<GameInfo> ().Gold >= Player_CardListHere [CardSelected].actionPoint * 100) {
+			if (GameInfo.GetComponent<GameInfo> ().Gold >= GoldNeed) {
 				GameObject.Find ("UpGradeOK").GetComponent<Button> ().interactable = true;
 			}
 			else
@@ -199,24 +215,30 @@ public class GameManager_InStage : MonoBehaviour {
 			Player_CardObjectList.Clear ();
 
 			List<CardInfo> Player_CardListHere=GameInfo.GetComponent<GameInfo> ().Player_CardList;
-			string text_tmp = "移除卡牌\n";
-			text_tmp += Player_CardListHere [CardSelected].actionPoint.ToString()+"-";
-			text_tmp += Player_CardListHere [CardSelected].actionColor.ToString()+"-";
-			text_tmp += Player_CardListHere [CardSelected].actionType.ToString()+"\n需要100金币";
-			ReadyToRemove.GetComponent<Text> ().text = text_tmp;
-
-			if (GameInfo.GetComponent<GameInfo> ().Gold >= 100) {
-				GameObject.Find ("RemoveOK").GetComponent<Button> ().interactable = true;
-			}
-			else
+			if (Player_CardListHere.Count <= 7) {
+				string text_tmp = "牌组数量不能少于7张";
 				GameObject.Find ("RemoveOK").GetComponent<Button> ().interactable = false;
+			} else {
+				int GoldNeed = -GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel-1].GoldReword;
+				string text_tmp = "移除卡牌\n";
+				text_tmp += Player_CardListHere [CardSelected].actionPoint.ToString()+"-";
+				text_tmp += Player_CardListHere [CardSelected].actionColor.ToString()+"-";
+				text_tmp += Player_CardListHere [CardSelected].actionType.ToString()+"\n需要"+GoldNeed.ToString()+"金币";
+				ReadyToRemove.GetComponent<Text> ().text = text_tmp;
+
+				if (GameInfo.GetComponent<GameInfo> ().Gold >= GoldNeed) {
+					GameObject.Find ("RemoveOK").GetComponent<Button> ().interactable = true;
+				}
+				else
+					GameObject.Find ("RemoveOK").GetComponent<Button> ().interactable = false;
+			}
 		}
 	}
 	//--------------------------------------------升级卡牌
 	public void OnClickDoUpGrade(){
 		List<CardInfo> Player_CardListHere=GameInfo.GetComponent<GameInfo> ().Player_CardList;
-		GameInfo.GetComponent<GameInfo> ().Gold -= Player_CardListHere [CardSelected].actionPoint * 100;
 		Player_CardListHere [CardSelected].actionPoint += 1;
+		GameInfo.GetComponent<GameInfo> ().Shooping ();
 
 		ReadyToUpGrade.SetActive (false);
 		ShowPlayerCard ("UpGrade");
@@ -230,8 +252,8 @@ public class GameManager_InStage : MonoBehaviour {
 	//-------------------------------------------移除卡牌
 	public void OnClickDoRemove(){
 		List<CardInfo> Player_CardListHere=GameInfo.GetComponent<GameInfo> ().Player_CardList;
-		GameInfo.GetComponent<GameInfo> ().Gold -= Player_CardListHere [CardSelected].actionPoint * 100;
 		Player_CardListHere.Remove (Player_CardListHere [CardSelected]);
+		GameInfo.GetComponent<GameInfo> ().Shooping ();
 
 		ReadyToRemove.SetActive (false);
 		ShowPlayerCard ("Remove");
@@ -255,10 +277,10 @@ public class GameManager_InStage : MonoBehaviour {
 		List<SkillInfo> SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
 		Vector3 Position = new Vector3 (-21, 14, 0);
 		SkillObjectList.Clear ();
-		for (int i = 0; i < SkillList.Count; i++) {
+		for (int i = 1; i < SkillList.Count; i++) {
 
 			GameObject tmp = Instantiate (Skill_Prefab, Position, Quaternion.identity);
-			tmp.GetComponent<Skill>().SkillNum = i+1;
+			tmp.GetComponent<Skill>().SkillNum = i;
 			tmp.GetComponent<Skill> ().Init ();
 			SkillObjectList.Add (tmp);
 			Position += new Vector3 (0, -5, 0);
@@ -270,7 +292,7 @@ public class GameManager_InStage : MonoBehaviour {
 		List<SkillInfo> SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
 		if (!c.GetComponent<Skill> ().Unlocked) {
 			UnlockSkill.SetActive (true);
-			SkillInfo SkillThis = GameInfo.GetComponent<GameInfo> ().SkillList [SkillSelect - 1];
+			SkillInfo SkillThis = GameInfo.GetComponent<GameInfo> ().SkillList [SkillSelect];
 			for (int i = 0; i < SkillObjectList.Count; i++)
 				SkillObjectList [i].GetComponent<Skill> ().Destroied ();
 			UnlockSkill.GetComponent<Text> ().text = "花费" + SkillThis.GoldRequire.ToString () + "金币解锁技能\"" + SkillThis.Name+"\"";
@@ -283,7 +305,7 @@ public class GameManager_InStage : MonoBehaviour {
 			for (int i = 0; i < SkillList.Count; i++) {
 				SkillList [i].Used = false;
 			}
-			SkillList [SkillSelect - 1].Used = true;
+			SkillList [SkillSelect].Used = true;
 			for (int i = 0; i < SkillObjectList.Count; i++) {
 				SkillObjectList[i].GetComponent<Skill> ().Init ();
 			}
@@ -293,12 +315,12 @@ public class GameManager_InStage : MonoBehaviour {
 
 	public void OnClickUnlockOK(){
 		List<SkillInfo> SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
-		SkillList [SkillSelect - 1].Unlocked = true;
-		GameInfo.GetComponent<GameInfo> ().Gold -= SkillList [SkillSelect - 1].GoldRequire;
+		SkillList [SkillSelect].Unlocked = true;
+		GameInfo.GetComponent<GameInfo> ().Gold -= SkillList [SkillSelect].GoldRequire;
 		for (int i = 0; i < SkillList.Count; i++) {
 			SkillList [i].Used = false;
 		}
-		SkillList [SkillSelect - 1].Used = true;
+		SkillList [SkillSelect].Used = true;
 		GameInfo.GetComponent<GameInfo> ().Player_SKill_Used=SkillSelect;
 
 		OnClickChooseSkill ();

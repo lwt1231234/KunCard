@@ -110,13 +110,15 @@ public class Card : MonoBehaviour {
 	void OnMouseDown()
 	{
 //		Debug.Log("鼠标按下时");
-		if(used == false){
-			if(InWhere == "Game")
-				GameManager.GetComponent<GameManager_InBattle>().OnClickCard(this.gameObject);
-			if(InWhere == "UpGrade")
-				GameManager.GetComponent<GameManager_InStage>().OnClickCard(this.gameObject);
-			if(InWhere == "Remove")
-				GameManager.GetComponent<GameManager_InStage>().OnClickCard(this.gameObject);
+		if (used == false) {
+			if (InWhere == "Game")
+				GameManager.GetComponent<GameManager_InBattle> ().OnClickCard (this.gameObject);
+			if (InWhere == "UpGrade")
+				GameManager.GetComponent<GameManager_InStage> ().OnClickCard (this.gameObject);
+			if (InWhere == "Remove")
+				GameManager.GetComponent<GameManager_InStage> ().OnClickCard (this.gameObject);
+			if (InWhere == "AddCard")
+				GameManager.GetComponent<GameManager_InBattle> ().OnClickAddCard (this.gameObject);
 		}
 
 	}
