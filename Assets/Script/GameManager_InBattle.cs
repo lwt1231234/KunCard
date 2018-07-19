@@ -18,6 +18,7 @@ public class GameManager_InBattle : MonoBehaviour {
 	public List<CardInfo> Player_CardListInGame=new List<CardInfo>();
 	public List<GameObject> Player_CardObjectList=new List<GameObject>();
 
+	public List<SkillInfo> CPUSkillList=new List<SkillInfo>();
 	public List<CardInfo> CPU_CardList=new List<CardInfo>();
 	public List<CardInfo> CPU_CardListInGame=new List<CardInfo>();
 	public List<GameObject> CPU_CardObjectList=new List<GameObject>();
@@ -29,12 +30,15 @@ public class GameManager_InBattle : MonoBehaviour {
 	public List<string> CPUAction=new List<string>();
 
 	public int Player_Health,CPU_Health,Player_Armor,CPU_Armor;
-	public int Player_Skill,CPU_Skill;
+	int Player_Get_Attack,CPU_Get_Attack;
+	public SkillInfo Player_Skill,CPU_Skill;
 	int AddCardLevel;
 
 	int CardUsedID,CPUCardUsedID,BPNumber;
 	string GameStage;
 	public GameObject GameInfo;
+
+	int Bust_player,Bust_CPU,Bust_player_last,Bust_CPU_last;
 
 	void Start () {
 		GameInfo = GameObject.Find ("GameInfo");
@@ -53,11 +57,11 @@ public class GameManager_InBattle : MonoBehaviour {
 
 
 		SkillList = GameInfo.GetComponent<GameInfo> ().SkillList;
-		Player_Skill = GameInfo.GetComponent<GameInfo> ().Player_SKill_Used;
-		PlayerSkillcard.GetComponent<SkillCard> ().Init (SkillList[Player_Skill].Name,SkillList[Player_Skill].Description);
+		Player_Skill = SkillList[GameInfo.GetComponent<GameInfo> ().Player_SKill_Used];
+		PlayerSkillcard.GetComponent<SkillCard> ().Init (Player_Skill.Name,Player_Skill.Description);
 
 		CPU_Skill = GameInfo.GetComponent<GameInfo> ().CPU_SKill_Used;
-		CPUSkillcard.GetComponent<SkillCard> ().Init (SkillList[CPU_Skill].Name,SkillList[CPU_Skill].Description);
+		CPUSkillcard.GetComponent<SkillCard> ().Init (CPU_Skill.Name,CPU_Skill.Description);
 
 		Player_Armor = 0;
 		CPU_Armor = 0;
@@ -100,7 +104,10 @@ public class GameManager_InBattle : MonoBehaviour {
 					CPU_CardListInGame [j - 1] = tmp;
 				}
 			}
-
+		Bust_player = 0;
+		Bust_player_last = 0;
+		Bust_CPU = 0;
+		Bust_CPU_last = 0;
 		UpdateUI ();
 		StartBP ();
 	}
@@ -145,7 +152,8 @@ public class GameManager_InBattle : MonoBehaviour {
 		}
 
 		CPUCardUsedID = Random.Range (0, CPU_CardObjectList.Count-1);
-		CPUCardUsedID = 0;
+		if (GameInfo.GetComponent<GameInfo> ().Cheat)
+			CPU_CardObjectList [CPUCardUsedID].GetComponent<Card> ().ViewPlay ();
 		CardUsedID = -1;
 	}
 
@@ -217,18 +225,20 @@ public class GameManager_InBattle : MonoBehaviour {
 
 		PlayerAction.Clear();
 		CPUAction.Clear();
+		Player_Get_Attack = 0;
+		CPU_Get_Attack = 0;
 
 		string Action_tmp = "";
 
 		if (PlayerInfo.actionType == "攻击") {
 			Action_tmp ="受到"+PlayerInfo.actionPoint.ToString()+"点攻击";
 			CPUAction.Add (Action_tmp);
-			CPU_Armor -= PlayerInfo.actionPoint;
+			CPU_Get_Attack += PlayerInfo.actionPoint;
 		}
 		if (CPUInfo.actionType == "攻击") {
 			Action_tmp ="受到"+CPUInfo.actionPoint.ToString()+"点攻击";
 			PlayerAction.Add (Action_tmp);
-			Player_Armor -= CPUInfo.actionPoint;
+			Player_Get_Attack += CPUInfo.actionPoint;
 		}
 		if (PlayerInfo.actionType == "防御") {
 			Action_tmp ="获得"+PlayerInfo.actionPoint.ToString()+"点护甲";
@@ -240,39 +250,66 @@ public class GameManager_InBattle : MonoBehaviour {
 			CPUAction.Add (Action_tmp);
 			CPU_Armor += CPUInfo.actionPoint;
 		}
+			
 		if (PlayerInfo.actionType == "技能") {
-			if (Player_Skill == 1)
+			if (Player_Skill.Name == "穿刺")
 				useSkill_chuanci ("Player",PlayerInfo.actionPoint);
-			if (Player_Skill == 2)
+			if (Player_Skill .Name == "恢复")
 				useSkill_huifu ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill .Name == "蓄力")
+				useSkill_xuli ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill.Name == "加固")
+				useSkill_jiagu ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill.Name == "盾击")
+				useSkill_dunji ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill.Name == "格挡")
+				useSkill_gedang ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill.Name == "重击")
+				useSkill_zhongji ("Player",PlayerInfo.actionPoint);
+			if (Player_Skill.Name == "反击")
+				useSkill_fanji ("Player",PlayerInfo.actionPoint);
 		}
 		if (CPUInfo.actionType == "技能") {
-			if (CPU_Skill == 1)
+			if (CPU_Skill.Name == "穿刺")
 				useSkill_chuanci ("CPU",CPUInfo.actionPoint);
-			if (CPU_Skill == 2)
+			if (CPU_Skill.Name == "恢复")
 				useSkill_huifu ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "蓄力")
+				useSkill_xuli ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "加固")
+				useSkill_jiagu ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "盾击")
+				useSkill_dunji ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "格挡")
+				useSkill_gedang ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "反击")
+				useSkill_fanji ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "重击")
+				useSkill_zhongji ("CPU",CPUInfo.actionPoint);
+			if (CPU_Skill.Name == "洗礼")
+				useSkill_xili ("CPU",CPUInfo.actionPoint);
 		}
-			
+
+		Player_Armor -= Player_Get_Attack;
+		Player_Get_Attack = 0;
+		Player_Get_Attack = 0;
 		if (Player_Armor < 0) {
 			Player_Health += Player_Armor;
 			Player_Armor = 0;
 		}
+		CPU_Armor -= CPU_Get_Attack;
+		CPU_Get_Attack = 0;
 		if (CPU_Armor < 0) {
 			CPU_Health += CPU_Armor;
 			CPU_Armor = 0;
 		}
+
 		if(PlayerAction.Count>0)
 			StartCoroutine (ShowAction("Player"));
 		if(CPUAction.Count>0)
 			StartCoroutine (ShowAction("CPU"));
 
 
-		for (int i = 0; i < PlayerAction.Count; i++) {
-			
-		}
-		for (int i = 0; i < CPUAction.Count; i++) {
-			
-		}
 		UpdateUI ();
 
 		StartCoroutine (CardBattle4 (PlayerCard,CPUCard));
@@ -292,6 +329,34 @@ public class GameManager_InBattle : MonoBehaviour {
 		} else {
 			UseCardButton.GetComponent<Button> ().interactable = true;
 			CPUCardUsedID = Random.Range (0, CPU_CardObjectList.Count-1);
+			if (GameInfo.GetComponent<GameInfo> ().Cheat)
+				CPU_CardObjectList [CPUCardUsedID].GetComponent<Card> ().ViewPlay ();
+		}
+
+		if (Bust_CPU_last > 0) {
+			for (int i = 0; i < CPU_CardObjectList.Count; i++)
+				CPU_CardObjectList [i].GetComponent<Card> ().CardInfo_this.actionPoint -= Bust_CPU_last;
+			Bust_CPU_last = 0;
+		}
+
+		if (Bust_CPU > 0) {
+			for (int i = 0; i < CPU_CardObjectList.Count; i++)
+				CPU_CardObjectList [i].GetComponent<Card> ().CardInfo_this.actionPoint += Bust_CPU;
+			Bust_CPU_last = Bust_CPU;
+			Bust_CPU = 0;
+		}
+
+		if (Bust_player_last > 0) {
+			for (int i = 0; i < Player_CardObjectList.Count; i++)
+				Player_CardObjectList [i].GetComponent<Card> ().CardInfo_this.actionPoint -= Bust_player_last;
+			Bust_player_last = 0;
+		}
+			
+		if (Bust_player > 0) {
+			for (int i = 0; i < Player_CardObjectList.Count; i++)
+				Player_CardObjectList [i].GetComponent<Card> ().CardInfo_this.actionPoint += Bust_player;
+			Bust_player_last = Bust_player;
+			Bust_player = 0;
 		}
 	}
 
@@ -350,6 +415,122 @@ public class GameManager_InBattle : MonoBehaviour {
 		}
 	}
 
+	void useSkill_xuli (string user,int point){
+		string Action_tmp = "";
+		Action_tmp ="获得"+point.ToString()+"点强化";
+		if (user == "Player") {
+			Bust_player += point;
+			PlayerAction.Add (Action_tmp);
+		}else{
+			Bust_CPU += point;
+			CPUAction.Add (Action_tmp);
+		}
+	}
+
+	void useSkill_jiagu (string user,int point){
+		string Action_tmp = "";
+
+		if (user == "Player") {
+			int tmp = point * 2 + Player_Armor;
+			Action_tmp ="护甲+"+tmp.ToString();
+			Player_Armor += tmp;
+			PlayerAction.Add (Action_tmp);
+		}else{
+			int tmp = point * 2 + CPU_Armor;
+			Action_tmp ="护甲+"+tmp.ToString();
+			CPU_Armor += tmp;
+			CPUAction.Add (Action_tmp);
+		}
+	}
+	void useSkill_dunji (string user,int point){
+		string Action_tmp = "";
+		if (user == "Player") {
+			Action_tmp ="获得"+point.ToString()+"点护甲";
+			Player_Armor += point;
+			PlayerAction.Add (Action_tmp);
+
+			Action_tmp = "受到" + Player_Armor.ToString () + "点攻击";
+			CPU_Get_Attack +=Player_Armor;
+			CPUAction.Add (Action_tmp);
+		}else{
+			Action_tmp ="获得"+point.ToString()+"点护甲";
+			CPU_Armor += point;
+			CPUAction.Add (Action_tmp);
+
+			Action_tmp = "受到" + CPU_Armor.ToString () + "点攻击";
+			Player_Get_Attack +=CPU_Armor;
+			PlayerAction.Add (Action_tmp);
+		}
+	}
+	void useSkill_gedang (string user,int point){
+		string Action_tmp = "";
+		Action_tmp ="获得"+(point*2).ToString()+"点护甲";
+		if (user == "Player") {
+			Player_Armor += point*2;
+			PlayerAction.Add (Action_tmp);
+		}else{
+			CPU_Armor += point*2;
+			CPUAction.Add (Action_tmp);
+		}
+	}
+	void useSkill_fanji (string user,int point){
+		string Action_tmp = "";
+
+		if (user == "Player") {
+			Action_tmp ="受到"+(Player_Get_Attack+point).ToString()+"点攻击";
+			CPU_Armor -= Player_Get_Attack+point;
+			PlayerAction.Add (Action_tmp);
+		}else{
+			Action_tmp ="受到"+(CPU_Get_Attack+point).ToString()+"点攻击";
+			Player_Armor -= CPU_Get_Attack+point;
+			PlayerAction.Add (Action_tmp);
+		}
+	}
+	void useSkill_zhongji (string user,int point){
+		string Action_tmp = "";
+		Action_tmp ="受到"+(point*2).ToString()+"点攻击";
+		if (user == "Player") {
+			CPU_Get_Attack += point*2;
+			CPUAction.Add (Action_tmp);
+		}else{
+			Player_Get_Attack += point*2;
+			PlayerAction.Add (Action_tmp);
+		}
+	}
+
+	void useSkill_xili (string user,int point){
+		string Action_tmp = "";
+		if (user == "Player") {
+			int health_before = Player_Health;
+			int maxHealth = GameInfo.GetComponent<GameInfo> ().Player_MaxHealth;
+			Player_Health += point;
+			if (Player_Health > maxHealth)
+				Player_Health = maxHealth;
+			int tmp = Player_Health - health_before;
+			Action_tmp ="回复"+tmp.ToString()+"点生命";
+			PlayerAction.Add (Action_tmp);
+
+			Action_tmp ="受到"+tmp.ToString()+"点攻击";
+			CPU_Get_Attack += tmp;
+			CPUAction.Add (Action_tmp);
+		}else{
+			int health_before = CPU_Health;
+			int maxHealth = GameInfo.GetComponent<GameInfo> ().CPU_MaxHealth;
+			CPU_Health += point;
+			if (CPU_Health > maxHealth)
+				CPU_Health = maxHealth;
+			int tmp = CPU_Health - health_before;
+			Action_tmp ="回复"+tmp.ToString()+"点生命";
+			CPUAction.Add (Action_tmp);
+
+			Action_tmp ="受到"+tmp.ToString()+"点攻击";
+			Player_Get_Attack += tmp;
+			PlayerAction.Add (Action_tmp);
+		}
+	}
+
+
+
 	//---------------------------------------玩家动作
 	public void OnClickCard(GameObject c){
 
@@ -407,13 +588,13 @@ public class GameManager_InBattle : MonoBehaviour {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"败北！";
 
-			Invoke ("Win", 3.0f);
+			Invoke ("Lose", 3.0f);
 		} 
 		if ((Player_Health == CPU_Health && Player_Armor==CPU_Armor )|| (Player_Health <=0 && CPU_Health<=0)) {
 			GameResult.GetComponent<Text> ().text = "生命 "+Player_Health.ToString()+":"+CPU_Health.ToString()+"\n"
 				+"护甲 "+Player_Armor.ToString()+":"+CPU_Armor.ToString()+"\n"+"平局！";
 
-			Invoke ("Win", 3.0f);
+			Invoke ("Lose", 3.0f);
 		} 
 	}
 
@@ -422,19 +603,19 @@ public class GameManager_InBattle : MonoBehaviour {
 		GameResult.SetActive (false);
 
 		GetGold.SetActive (true);
-		int GoldReword = -GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel].GoldReword;
+		int GoldReword = GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel-1].GoldReword;
 		GetGold.GetComponent<Text> ().text = "获得" + GoldReword.ToString () + "金币\n请选择一张牌添加到牌库中";
 
 		string[] t = { "攻击", "防御", "技能" };
-		int point = Random.Range (1, AddCardLevel);
+		int point = Random.Range (1, AddCardLevel+1);
 		string type = t [Random.Range (0, 3)];
-		AddCardList.Add (new CardInfo (point, "石", type));
-
-		point = Random.Range (1, AddCardLevel);
-		type = t [Random.Range (0, 3)];
 		AddCardList.Add (new CardInfo (point, "剪", type));
 
-		point = Random.Range (1, AddCardLevel);
+		point = Random.Range (1, AddCardLevel+1);
+		type = t [Random.Range (0, 3)];
+		AddCardList.Add (new CardInfo (point, "石", type));
+
+		point = Random.Range (1, AddCardLevel+1);
 		type = t [Random.Range (0, 3)];
 		AddCardList.Add (new CardInfo (point, "布", type));
 
@@ -446,8 +627,18 @@ public class GameManager_InBattle : MonoBehaviour {
 
 			CPUCardPosition += new Vector3 (10, 0, 0);
 		}
-
 		CancelAddCardButton.SetActive (true);
+	}
+
+	void Lose(){
+		GameInfo.GetComponent<GameInfo> ().LostGame ();
+		GameResult.SetActive (false);
+
+		GetGold.SetActive (true);
+		int GoldReword = GameInfo.GetComponent<GameInfo> ().StageList[GameInfo.GetComponent<GameInfo> ().StageLevel-1].GoldReword;
+		GetGold.GetComponent<Text> ().text = "获得" + (GoldReword/2).ToString () + "金币";
+
+		Invoke ("BackToStage", 2.0f);
 	}
 
 	public void OnClickAddCard(GameObject c){

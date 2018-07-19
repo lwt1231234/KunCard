@@ -61,6 +61,9 @@
      <Compile Include="Assets\Script\Skill.cs" />
      <Compile Include="Assets\Script\SkillCard.cs" />
      <Compile Include="Assets\Script\Stage.cs" />
+     <Compile Include="Assets\Script\VideoManager_menue.cs" />
+     <Compile Include="Assets\Script\VideoManager_Opening.cs" />
+     <Compile Include="Assets\Script\VideoText.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

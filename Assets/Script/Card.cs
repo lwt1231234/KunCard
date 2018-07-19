@@ -30,7 +30,7 @@ public class Card : MonoBehaviour {
 	}
 
 	public void Init(CardInfo c,bool vis,string o,string p){
-		CardInfo_this = c;
+		CardInfo_this = new CardInfo(c.actionPoint,c.actionColor,c.actionType);
 		visiable = vis;
 		owner = o;
 		InWhere = p;
@@ -80,6 +80,10 @@ public class Card : MonoBehaviour {
 
 		Vector3 offsetType = new Vector3 (0, -cardHigh, 0);
 		actionType_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetType;
+	}
+
+	public void ViewPlay(){
+		gameObject.GetComponent<SpriteRenderer>().sprite = images[1];
 	}
 
 	public void WinBattle(){

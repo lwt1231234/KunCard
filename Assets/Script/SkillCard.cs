@@ -24,7 +24,7 @@ public class SkillCard : MonoBehaviour {
 		Name_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0);
 		Name_UI.GetComponent<Text> ().text = name;
 
-		Vector3 offsetColor = new Vector3 (0,55, 0);
+		Vector3 offsetColor = new Vector3 (20,55, 0);
 		Description_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 		Description_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
 		Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetColor;

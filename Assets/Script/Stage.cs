@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Stage : MonoBehaviour {
 
-	public int StageLevel;
+	public int StageLevel,GoldReword;
 	public string StageType;
 	int Available;
 	public string Description;
@@ -17,6 +17,7 @@ public class Stage : MonoBehaviour {
 		StageInfo t = GameObject.Find ("GameInfo").GetComponent<GameInfo>().StageList[StageLevel-1];
 		StageType = t.StageType;
 		Description = t.Description;
+		GoldReword = t.GoldReword;
 
 		bool[] StageClear = GameObject.Find ("GameInfo").GetComponent<GameInfo>().StageClear;
 		Available = 0;
@@ -95,12 +96,21 @@ public class Stage : MonoBehaviour {
 			gameObject.GetComponent<SpriteRenderer> ().color = a;
 		}
 		if (Description_UI == null) {
-			Vector3 offsetColor = new Vector3 (0,35, 0);
-			Description_UI= (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
+			Vector3 offsetColor = new Vector3 (0, 35, 0);
+			Description_UI = (GameObject)Instantiate (UI_Text, transform.position, Quaternion.identity);
 			Description_UI.transform.SetParent (GameObject.Find ("Canvas").transform);
-			Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint(transform.position) - new Vector3(Screen.width / 2, Screen.height / 2, 0) + offsetColor;
-			Description_UI.GetComponent<Text> ().text = Description;
-			Description_UI.SetActive(false);
+			Description_UI.transform.localPosition = Camera.main.WorldToScreenPoint (transform.position) - new Vector3 (Screen.width / 2, Screen.height / 2, 0) + offsetColor;
+			if (Available > 0)
+				Description_UI.GetComponent<Text> ().text = Description;
+			else
+				Description_UI.GetComponent<Text> ().text = "???";
+			
+			Description_UI.SetActive (false);
+		} else {
+			if (Available > 0)
+				Description_UI.GetComponent<Text> ().text = Description;
+			else
+				Description_UI.GetComponent<Text> ().text = "???";
 		}
 
 	}
